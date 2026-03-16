@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { dialogueData } from './dialogueData'
+import { activeCourse } from './courses/index.js'
 
 const STORAGE_KEY = 'sparta_memo_timestamps'
 
@@ -233,14 +234,14 @@ export default function MemorizationPage() {
       <audio
         key={`en-${currentMemo}`}
         ref={audioEnRef}
-        src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo}.m4a`)}`}
+        src={activeCourse.meta.getAudioSrc(currentMemo)}
         loop={isLooping && activePlayer === 'en'}
         preload="metadata"
       />
       <audio
         key={`ko-${currentMemo}`}
         ref={audioKoRef}
-        src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo} 한국어해설.m4a`)}`}
+        src={activeCourse.meta.getAudioKoSrc(currentMemo)}
         loop={isLooping && activePlayer === 'ko'}
         preload="metadata"
       />
