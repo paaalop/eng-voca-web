@@ -32,78 +32,77 @@ function App() {
 
   return (
     <>
-    <PageTabBar page={page} setPage={setPage} />
-    <div className="container">
-      <header className="header" style={{ marginBottom: '1.5rem' }}>
-        <h1 className="title">Sparta VOCA</h1>
-        <p className="subtitle">1기 홀수 영단어 데일리 학습</p>
-      </header>
+      <PageTabBar page={page} setPage={setPage} />
+      <div className="container">
+        <header className="header" style={{ marginBottom: '1.5rem' }}>
+          <h1 className="title">Sparta VOCA</h1>
+        </header>
 
-      <div className="nav-container">
-        {/* 주차 네비게이션 */}
-        <div className="nav-row">
-          <span className="nav-label">Week</span>
-          {weeks.map(w => (
-            <button
-              key={w}
-              className={`nav-btn ${currentWeek === w ? 'active' : ''}`}
-              onClick={() => setCurrentWeek(w)}
-            >
-              {w}
-            </button>
-          ))}
+        <div className="nav-container">
+          {/* 주차 네비게이션 */}
+          <div className="nav-row">
+            <span className="nav-label">Week</span>
+            {weeks.map(w => (
+              <button
+                key={w}
+                className={`nav-btn ${currentWeek === w ? 'active' : ''}`}
+                onClick={() => setCurrentWeek(w)}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+
+          {/* 요일 네비게이션 */}
+          <div className="nav-row" style={{ borderBottom: 'none' }}>
+            <span className="nav-label">Day</span>
+            {days.map(d => (
+              <button
+                key={d}
+                className={`nav-btn ${currentDay === d ? 'active' : ''}`}
+                onClick={() => setCurrentDay(d)}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* 요일 네비게이션 */}
-        <div className="nav-row" style={{ borderBottom: 'none' }}>
-          <span className="nav-label">Day</span>
-          {days.map(d => (
-            <button
-              key={d}
-              className={`nav-btn ${currentDay === d ? 'active' : ''}`}
-              onClick={() => setCurrentDay(d)}
-            >
-              {d}
-            </button>
-          ))}
+        {/* 3단계 스텝 네비게이션 */}
+        <div className="step-container">
+          <button
+            className={`step-btn ${currentStep === 1 ? 'active' : ''}`}
+            onClick={() => setCurrentStep(1)}
+          >
+            <div className="step-num">Step 1</div>
+            <div className="step-title">암기 카드</div>
+          </button>
+          <button
+            className={`step-btn ${currentStep === 2 ? 'active' : ''}`}
+            onClick={() => setCurrentStep(2)}
+          >
+            <div className="step-num">Step 2</div>
+            <div className="step-title">예문 빈칸</div>
+          </button>
+          <button
+            className={`step-btn ${currentStep === 3 ? 'active' : ''}`}
+            onClick={() => setCurrentStep(3)}
+          >
+            <div className="step-num">Step 3</div>
+            <div className="step-title">스피드 인출</div>
+          </button>
         </div>
-      </div>
 
-      {/* 3단계 스텝 네비게이션 */}
-      <div className="step-container">
-        <button
-          className={`step-btn ${currentStep === 1 ? 'active' : ''}`}
-          onClick={() => setCurrentStep(1)}
-        >
-          <div className="step-num">Step 1</div>
-          <div className="step-title">암기 카드</div>
-        </button>
-        <button
-          className={`step-btn ${currentStep === 2 ? 'active' : ''}`}
-          onClick={() => setCurrentStep(2)}
-        >
-          <div className="step-num">Step 2</div>
-          <div className="step-title">예문 빈칸</div>
-        </button>
-        <button
-          className={`step-btn ${currentStep === 3 ? 'active' : ''}`}
-          onClick={() => setCurrentStep(3)}
-        >
-          <div className="step-num">Step 3</div>
-          <div className="step-title">스피드 인출</div>
-        </button>
+        {filteredWords.length === 0 ? (
+          <div className="empty-state">해당 요일의 단어 데이터가 없습니다.</div>
+        ) : (
+          <>
+            {currentStep === 1 && <FlashcardView words={filteredWords} onComplete={() => setCurrentStep(2)} />}
+            {currentStep === 2 && <ContextQuizView words={filteredWords} onComplete={() => setCurrentStep(3)} />}
+            {currentStep === 3 && <SpeedQuizView words={filteredWords} />}
+          </>
+        )}
       </div>
-
-      {filteredWords.length === 0 ? (
-        <div className="empty-state">해당 요일의 단어 데이터가 없습니다.</div>
-      ) : (
-        <>
-          {currentStep === 1 && <FlashcardView words={filteredWords} onComplete={() => setCurrentStep(2)} />}
-          {currentStep === 2 && <ContextQuizView words={filteredWords} onComplete={() => setCurrentStep(3)} />}
-          {currentStep === 3 && <SpeedQuizView words={filteredWords} />}
-        </>
-      )}
-    </div>
     </>
   );
 }
@@ -176,7 +175,7 @@ function FlashcardView({ words, onComplete }) {
         )}
 
         {!isFlipped && (
-          <div className="card-hint">클릭하여 뜻 확인 (즉시 전환)</div>
+          <div className="card-hint">클릭하여 뜻 확인</div>
         )}
       </div>
 
