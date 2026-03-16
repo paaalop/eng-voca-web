@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# PDF 및 이미지 파일
+*.pdf
+*.png
+pages/
+
+# 데이터 생성 스크립트 (이미 data.js 생성 완료)
+extract_pdf.py
+update_data.py
+
+# 기타
+.DS_Store
+*.log
