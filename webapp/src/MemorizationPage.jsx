@@ -22,25 +22,26 @@ export default function MemorizationPage() {
   const [isStampMode, setIsStampMode] = useState(false)
   const [stampIndex, setStampIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isLooping, setIsLooping] = useState(false)
+  const [activePlayer, setActivePlayer] = useState('en') // 'en' | 'ko'
   const [timestamps, setTimestamps] = useState(loadTimestamps)
 
-  // timestamps.json 자동 로드 (스크립트 실행 후 자동 적용)
+  // timestamps.json 자동 로드
   useEffect(() => {
     fetch('/timestamps.json')
       .then(r => { if (!r.ok) throw new Error('no file'); return r.json() })
       .then(data => {
         setTimestamps(prev => {
-          // localStorage에 수동으로 저장한 항목이 있으면 우선 적용
           const merged = { ...data }
           const manual = loadTimestamps()
           Object.keys(manual).forEach(k => { merged[k] = manual[k] })
           return merged
         })
       })
-      .catch(() => {}) // 파일 없으면 무시
+      .catch(() => {})
   }, [])
-  const [activePlayer, setActivePlayer] = useState('en') // 'en' | 'ko'
 
   const audioEnRef = useRef(null)
   const audioKoRef = useRef(null)
@@ -50,20 +51,22 @@ export default function MemorizationPage() {
   const memo = dialogueData.find(d => d.id === currentMemo)
   const memoTs = timestamps[currentMemo] || []
 
-  // 현재 재생 중인 줄 계산
+  // 현재 재생 중인 줄 계산 (en 오디오 기준)
   const activeLineIndex = useMemo(() => {
+    if (activePlayer !== 'en') return -1
     if (memoTs.length === 0) return -1
     for (let i = memoTs.length - 1; i >= 0; i--) {
       if (memoTs[i] != null && currentTime >= memoTs[i]) return i
     }
     return -1
-  }, [currentTime, memoTs])
+  }, [currentTime, memoTs, activePlayer])
 
   // 메모 변경 시 초기화
   useEffect(() => {
     setIsStampMode(false)
     setStampIndex(0)
     setCurrentTime(0)
+    setDuration(0)
     setIsPlaying(false)
     if (audioEnRef.current) {
       audioEnRef.current.pause()
@@ -75,22 +78,33 @@ export default function MemorizationPage() {
     }
   }, [currentMemo])
 
-  // 오디오 이벤트 바인딩
+  // 활성 플레이어 변경 시 이벤트 바인딩
   useEffect(() => {
-    const audio = audioEnRef.current
+    const audio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
     if (!audio) return
+
     const onTime = () => setCurrentTime(audio.currentTime)
     const onPlay = () => setIsPlaying(true)
     const onPause = () => setIsPlaying(false)
+    const onLoadedMetadata = () => setDuration(audio.duration)
+    const onEnded = () => setIsPlaying(false)
+
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('play', onPlay)
     audio.addEventListener('pause', onPause)
+    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+    audio.addEventListener('ended', onEnded)
+
+    if (audio.duration && !isNaN(audio.duration)) setDuration(audio.duration)
+
     return () => {
       audio.removeEventListener('timeupdate', onTime)
       audio.removeEventListener('play', onPlay)
       audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+      audio.removeEventListener('ended', onEnded)
     }
-  }, [currentMemo])
+  }, [currentMemo, activePlayer])
 
   // 활성 줄 자동 스크롤
   useEffect(() => {
@@ -99,15 +113,68 @@ export default function MemorizationPage() {
     }
   }, [activeLineIndex, isPlaying])
 
-  // 줄 클릭 → 오디오 점프
+  // 해설/원문 스왑
+  const handleSwapPlayer = useCallback(() => {
+    const currentAudio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
+    if (currentAudio) currentAudio.pause()
+    setIsPlaying(false)
+    setCurrentTime(0)
+    setDuration(0)
+    setActivePlayer(p => p === 'en' ? 'ko' : 'en')
+  }, [activePlayer])
+
+  // 재생/일시정지
+  const handlePlayPause = useCallback(() => {
+    const audio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
+    if (!audio) return
+    if (isPlaying) audio.pause()
+    else audio.play()
+  }, [isPlaying, activePlayer])
+
+  // 처음으로 돌아가기
+  const handleGoToStart = useCallback(() => {
+    const audio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
+    if (!audio) return
+    audio.currentTime = 0
+    setCurrentTime(0)
+  }, [activePlayer])
+
+  // 반복 토글
+  const handleLoopToggle = useCallback(() => {
+    setIsLooping(v => {
+      const newVal = !v
+      const audio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
+      if (audio) audio.loop = newVal
+      return newVal
+    })
+  }, [activePlayer])
+
+  // 시크바 조작
+  const handleSeek = useCallback((time) => {
+    const audio = activePlayer === 'en' ? audioEnRef.current : audioKoRef.current
+    if (!audio) return
+    audio.currentTime = time
+    setCurrentTime(time)
+  }, [activePlayer])
+
+  // 줄 클릭 → 오디오 점프 (en 오디오 기준)
   const handleLineClick = useCallback((index) => {
     const t = memoTs[index]
     if (t == null) return
-    const audio = audioEnRef.current
-    if (!audio) return
-    audio.currentTime = t
-    audio.play()
-  }, [memoTs])
+    const enAudio = audioEnRef.current
+    if (!enAudio) return
+
+    if (activePlayer !== 'en') {
+      const koAudio = audioKoRef.current
+      if (koAudio) koAudio.pause()
+      setIsPlaying(false)
+      setActivePlayer('en')
+    }
+
+    enAudio.currentTime = t
+    setCurrentTime(t)
+    enAudio.play()
+  }, [memoTs, activePlayer])
 
   // 타임스탬프 찍기
   const handleStamp = useCallback(() => {
@@ -161,7 +228,23 @@ export default function MemorizationPage() {
   const allStamped = hasLines && stampedCount >= memo.lines.length
 
   return (
-    <div className="container">
+    <div className="container" style={{ paddingBottom: '6rem' }}>
+      {/* 숨김 오디오 요소 */}
+      <audio
+        key={`en-${currentMemo}`}
+        ref={audioEnRef}
+        src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo}.m4a`)}`}
+        loop={isLooping && activePlayer === 'en'}
+        preload="metadata"
+      />
+      <audio
+        key={`ko-${currentMemo}`}
+        ref={audioKoRef}
+        src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo} 한국어해설.m4a`)}`}
+        loop={isLooping && activePlayer === 'ko'}
+        preload="metadata"
+      />
+
       <header className="header" style={{ marginBottom: '1.5rem' }}>
         <h1 className="title">Sparta MEMO</h1>
         <p className="subtitle">대화문 암기 훈련</p>
@@ -173,32 +256,6 @@ export default function MemorizationPage() {
         currentMemo={currentMemo}
         onSelect={id => { setCurrentMemo(id); setIsStampMode(false); setStampIndex(0) }}
       />
-
-      {/* 오디오 플레이어 */}
-      <div className="memo-players">
-        <div className={`memo-player-card ${activePlayer === 'en' ? 'active' : ''}`} onClick={() => setActivePlayer('en')}>
-          <div className="memo-player-label">🇺🇸 English</div>
-          <audio
-            key={`en-${currentMemo}`}
-            ref={audioEnRef}
-            src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo}.m4a`)}`}
-            controls
-            className="memo-audio"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
-        </div>
-        <div className={`memo-player-card ${activePlayer === 'ko' ? 'active' : ''}`} onClick={() => setActivePlayer('ko')}>
-          <div className="memo-player-label">🇰🇷 한국어 해설</div>
-          <audio
-            key={`ko-${currentMemo}`}
-            ref={audioKoRef}
-            src={`/voices/${encodeURIComponent(`스파르타 memo ${currentMemo} 한국어해설.m4a`)}`}
-            controls
-            className="memo-audio"
-          />
-        </div>
-      </div>
 
       {/* 컨트롤 바 */}
       <div className="memo-controls">
@@ -324,6 +381,93 @@ export default function MemorizationPage() {
             )
           })
         )}
+      </div>
+
+      {/* 하단 오디오 네비게이터 */}
+      <AudioNavigator
+        activePlayer={activePlayer}
+        onSwap={handleSwapPlayer}
+        isPlaying={isPlaying}
+        onPlayPause={handlePlayPause}
+        onGoToStart={handleGoToStart}
+        isLooping={isLooping}
+        onLoopToggle={handleLoopToggle}
+        currentTime={currentTime}
+        duration={duration}
+        onSeek={handleSeek}
+      />
+    </div>
+  )
+}
+
+function AudioNavigator({ activePlayer, onSwap, isPlaying, onPlayPause, onGoToStart, isLooping, onLoopToggle, currentTime, duration, onSeek }) {
+  const label = activePlayer === 'en' ? '원문' : '해설'
+  const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0
+
+  return (
+    <div className="audio-nav">
+      {/* 좌측: 해설/원문 스왑 버튼 */}
+      <button
+        className="audio-nav-swap"
+        onClick={onSwap}
+        title={activePlayer === 'en' ? '한국어 해설로 전환' : '영어 원문으로 전환'}
+      >
+        <span className="audio-nav-swap-label">{label}</span>
+        <svg className="audio-nav-swap-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+
+      {/* 중앙: 트랙 레이블 + 시크바 */}
+      <div className="audio-nav-track">
+        <span className="audio-nav-track-label">{label}</span>
+        <div className="audio-nav-seekbar-wrap">
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            step={0.1}
+            value={currentTime}
+            onChange={e => onSeek(parseFloat(e.target.value))}
+            className="audio-nav-seekbar"
+            style={{ '--progress': `${progressPct}%` }}
+          />
+        </div>
+      </div>
+
+      {/* 우측: 컨트롤 버튼 3개 */}
+      <div className="audio-nav-btns">
+        {/* 처음으로 돌아가기 */}
+        <button className="audio-nav-btn" onClick={onGoToStart} title="처음으로 돌아가기">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+          </svg>
+        </button>
+
+        {/* 재생/일시정지 */}
+        <button className="audio-nav-btn audio-nav-playbtn" onClick={onPlayPause} title={isPlaying ? '일시정지' : '재생'}>
+          {isPlaying ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          )}
+        </button>
+
+        {/* 반복 */}
+        <button className={`audio-nav-btn ${isLooping ? 'audio-nav-btn-active' : ''}`} onClick={onLoopToggle} title="반복">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+        </button>
       </div>
     </div>
   )

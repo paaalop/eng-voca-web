@@ -571,41 +571,169 @@ button {
   min-width: 0;
 }
 
-/* 오디오 플레이어 */
-.memo-players {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* 하단 오디오 네비게이터 */
+.audio-nav {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2.5rem);
+  max-width: 680px;
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-@media (max-width: 520px) {
-  .memo-players { grid-template-columns: 1fr; }
-}
-
-.memo-player-card {
   background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  transition: border-color 0.15s;
+  border: 2px solid #1a1a1a;
+  border-radius: 50px;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
+  z-index: 200;
 }
 
-.memo-player-card.active {
-  border-color: var(--text-primary);
+/* 스왑 버튼 (해설/원문 원형 배지) */
+.audio-nav-swap {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: opacity 0.15s, background 0.15s;
 }
 
-.memo-player-label {
-  font-size: 0.8rem;
+.audio-nav-swap:hover { opacity: 0.8; }
+
+.audio-nav-swap-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.audio-nav-swap-icon {
+  opacity: 0.65;
+}
+
+/* 중앙 트랙 영역 */
+.audio-nav-track {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.audio-nav-track-label {
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
-.memo-audio {
+.audio-nav-seekbar-wrap {
   width: 100%;
-  height: 36px;
-  accent-color: var(--text-primary);
+}
+
+.audio-nav-seekbar {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    #1a1a1a var(--progress, 0%),
+    #e4e4e7 var(--progress, 0%)
+  );
+}
+
+.audio-nav-seekbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.audio-nav-seekbar::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.audio-nav-seekbar::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: pointer;
+  border: none;
+}
+
+/* 우측 버튼 영역 */
+.audio-nav-btns {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.audio-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 50%;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1;
+}
+
+.audio-nav-btn:hover { background: #f4f4f5; }
+
+.audio-nav-btn-active {
+  color: #2563eb;
+}
+
+.audio-nav-playbtn {
+  width: 40px;
+  height: 40px;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.audio-nav-playbtn:hover { background: #333; }
+
+@media (max-width: 480px) {
+  .audio-nav {
+    width: calc(100% - 1.5rem);
+    bottom: 0.75rem;
+    padding: 0.4rem 0.5rem 0.4rem 0.4rem;
+    gap: 0.5rem;
+  }
+  .audio-nav-swap {
+    width: 46px;
+    height: 46px;
+  }
+  .audio-nav-playbtn {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* 컨트롤 바 */
