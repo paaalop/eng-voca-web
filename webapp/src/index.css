@@ -425,3 +425,382 @@ button {
 .retry-button {
   margin-top: 1.5rem;
 }
+
+/* ============================================
+   페이지 탭 바
+   ============================================ */
+.page-tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1.5rem;
+}
+
+.page-tab {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.page-tab:hover { color: var(--text-primary); }
+.page-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+}
+
+/* ============================================
+   대화문 암기 페이지
+   ============================================ */
+
+/* 커스텀 메모 드롭다운 */
+.mdd-wrap {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.mdd-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  gap: 0.5rem;
+}
+
+.mdd-trigger:hover { border-color: #a1a1aa; }
+
+.mdd-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.mdd-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a1a1aa;
+  flex-shrink: 0;
+  min-width: 1.2rem;
+}
+
+.mdd-trigger-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mdd-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15em 0.55em;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.mdd-badge-dialogue {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.mdd-badge-monologue {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.mdd-chevron {
+  color: #a1a1aa;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.mdd-chevron.open { transform: rotate(180deg); }
+
+.mdd-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  z-index: 200;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 0.3rem;
+  list-style: none;
+  margin: 0;
+}
+
+.mdd-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.mdd-item:hover { background: #f4f4f5; }
+.mdd-item.active { background: #f4f4f5; font-weight: 700; }
+
+.mdd-item-title {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+/* 오디오 플레이어 */
+.memo-players {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 520px) {
+  .memo-players { grid-template-columns: 1fr; }
+}
+
+.memo-player-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  transition: border-color 0.15s;
+}
+
+.memo-player-card.active {
+  border-color: var(--text-primary);
+}
+
+.memo-player-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.memo-audio {
+  width: 100%;
+  height: 36px;
+  accent-color: var(--text-primary);
+}
+
+/* 컨트롤 바 */
+.memo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.memo-ctrl-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  background: var(--white);
+  transition: all 0.15s;
+}
+
+.memo-ctrl-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+.memo-ctrl-btn.active { background: var(--text-primary); color: var(--white); border-color: var(--text-primary); }
+
+.memo-speaker-filter {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.stamp-btn { font-size: 0.8rem; }
+.danger-btn { color: #b91c1c; border-color: #fca5a5; }
+.danger-btn:hover { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+
+/* 메모 번호 완료 점 */
+.memo-done-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+}
+
+/* 스탬프 모드 배너 */
+.stamp-mode-banner {
+  background: #fefce8;
+  border: 1px solid #fde047;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #713f12;
+}
+
+.stamp-mode-banner strong { font-size: 0.92rem; }
+
+.stamp-mode-banner kbd {
+  background: #fef08a;
+  border: 1px solid #fbbf24;
+  border-radius: 4px;
+  padding: 0 0.4em;
+  font-family: inherit;
+  font-size: 0.85em;
+}
+
+.stamp-progress {
+  font-size: 0.85rem;
+  color: #92400e;
+}
+
+/* 스크립트 */
+.memo-script {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 4rem;
+}
+
+.memo-line {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.memo-line-clickable {
+  cursor: pointer;
+}
+
+.memo-line-clickable:hover {
+  background-color: #f4f4f5;
+}
+
+.memo-line-active {
+  background-color: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.memo-line-hidden {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.memo-line-next-stamp {
+  border-color: #fde047;
+  background-color: #fefce8;
+}
+
+.memo-line-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.memo-speaker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.memo-speaker-a {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.memo-speaker-b {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.memo-speaker-n {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.memo-timestamp {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.memo-stamp-indicator {
+  font-size: 0.72rem;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.memo-line-en {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.memo-line-ko {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+.memo-line-masked {
+  font-size: 0.88rem;
+  color: #a1a1aa;
+  font-style: italic;
+  padding: 0.25rem 0;
+}
+
+/* 빈 상태 */
+.memo-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.memo-empty-hint {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.memo-empty-example {
+  text-align: left;
+  background: #f4f4f5;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.82rem;
+  margin-top: 1rem;
+  display: inline-block;
+}

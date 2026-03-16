@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { vocabularyData } from './data';
+import MemorizationPage from './MemorizationPage';
 import './index.css';
 
 function App() {
+  const [page, setPage] = useState('voca'); // 'voca' | 'memo'
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentDay, setCurrentDay] = useState('화');
   const [currentStep, setCurrentStep] = useState(1);
@@ -19,7 +21,18 @@ function App() {
     setCurrentStep(1);
   }, [currentWeek, currentDay]);
 
+  if (page === 'memo') {
+    return (
+      <>
+        <PageTabBar page={page} setPage={setPage} />
+        <MemorizationPage />
+      </>
+    );
+  }
+
   return (
+    <>
+    <PageTabBar page={page} setPage={setPage} />
     <div className="container">
       <header className="header" style={{ marginBottom: '1.5rem' }}>
         <h1 className="title">Sparta VOCA</h1>
@@ -90,6 +103,26 @@ function App() {
           {currentStep === 3 && <SpeedQuizView words={filteredWords} />}
         </>
       )}
+    </div>
+    </>
+  );
+}
+
+function PageTabBar({ page, setPage }) {
+  return (
+    <div className="page-tab-bar">
+      <button
+        className={`page-tab ${page === 'voca' ? 'active' : ''}`}
+        onClick={() => setPage('voca')}
+      >
+        단어 학습
+      </button>
+      <button
+        className={`page-tab ${page === 'memo' ? 'active' : ''}`}
+        onClick={() => setPage('memo')}
+      >
+        대화문 암기
+      </button>
     </div>
   );
 }
