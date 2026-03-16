@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { vocabularyData } from './data';
+import { activeCourse } from './courses/index.js';
 import MemorizationPage from './MemorizationPage';
 import './index.css';
 
@@ -9,8 +10,7 @@ function App() {
   const [currentDay, setCurrentDay] = useState('화');
   const [currentStep, setCurrentStep] = useState(1);
 
-  const weeks = [1, 2, 3, 4, 5, 6, 7];
-  const days = ['화', '수', '목'];
+  const { weeks, days, title } = activeCourse.meta;
 
   const filteredWords = useMemo(() =>
     vocabularyData.filter(v => v.week === currentWeek && v.day === currentDay),
@@ -35,7 +35,7 @@ function App() {
       <PageTabBar page={page} setPage={setPage} />
       <div className="container">
         <header className="header" style={{ marginBottom: '1.5rem' }}>
-          <h1 className="title">Sparta VOCA</h1>
+          <h1 className="title">{title}</h1>
         </header>
 
         <div className="nav-container">
